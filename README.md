@@ -15,6 +15,13 @@ to info.
 # Options
 Brakeman also includes some optional checks and by setting the following in your `.pronto.yml` you can run every check included in the gem:
 
+## Running in a Subdirectory
+
+```yaml
+brakeman:
+  path: "some_folder/"
+```
+
 ## Run all checks
 
 ```yaml
@@ -32,3 +39,19 @@ brakeman:
 ```
 
 (This is the equivalent of running `brakeman -i IGNOREFILE` on the command line.)
+
+## Extra Brakeman configuration
+
+You can define additional Brakeman configuration by creating a [`config/brakeman.yml` file](https://brakemanscanner.org/docs/options/#configuration-files). This file will be automatically loaded by Brakeman.
+
+For example, if you want to run Brakeman with the following options `brakeman --run-all-checks --rails6 --branch-limit -1` you can use the `--create-config` flag to generate the `config/brakeman.yml` file, and it will look something like this:
+
+```yaml
+---
+:run_all_checks: true
+:rails3: true
+:rails4: true
+:rails5: true
+:rails6: true
+:branch_limit: -1
+```

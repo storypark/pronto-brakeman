@@ -5,15 +5,18 @@ module Pronto
   class Brakeman < Runner
     def run
       patches = ruby_patches | erb_patches
-      files = patches.map do |patch|
-        patch.new_file_full_path.relative_path_from(repo_path).to_s
-      end.sort
+      any_applicable_files = patches.any? do |patch|
+        patch.new_file_full_path.relative_path_from(brakeman_run_path)
+        true
+      rescue ArgumentError
+        # Not under `brakeman_run_path`.
+        false
+      end
 
-      return [] unless files.any?
+      return [] unless any_applicable_files
 
-      output = ::Brakeman.run(app_path: repo_path,
+      output = ::Brakeman.run(app_path: brakeman_run_path,
                               output_formats: [:to_s],
-                              only_files: files,
                               run_all_checks: run_all_checks?,
                               ignore_file: ignore_file)
        messages_for(patches, output).compact
@@ -56,6 +59,11 @@ module Pronto
       code_patches.find do |patch|
         patch.new_file_full_path.to_s == warning.file.absolute
       end
+    end
+
+    def brakeman_run_path
+      return repo_path unless pronto_brakeman_config['path']
+      File.join(repo_path, pronto_brakeman_config['path'])
     end
 
     def run_all_checks?
